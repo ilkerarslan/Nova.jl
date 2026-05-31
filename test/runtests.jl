@@ -362,4 +362,381 @@ using Test
         end
     end
 
+    @testset "GaussianNB" begin
+        using NovaML.NaiveBayes: GaussianNB
+
+        @testset "Constructor defaults" begin
+            gnb = GaussianNB()
+            @test gnb.var_smoothing == 1e-9
+            @test gnb.priors === nothing
+            @test gnb.fitted == false
+            @test gnb.n_features_in_ == 0
+            @test isempty(gnb.classes_)
+        end
+
+        @testset "Constructor custom params" begin
+            gnb = GaussianNB(var_smoothing=1e-6, priors=[0.3, 0.7])
+            @test gnb.var_smoothing == 1e-6
+            @test gnb.priors == [0.3, 0.7]
+        end
+
+        @testset "Constructor validation" begin
+            @test_throws ArgumentError GaussianNB(var_smoothing=-1.0)
+            # NaN/Inf pass a bare `< 0` check (both compare false) but would
+            # propagate into NaN/Inf learned variances and posteriors.
+            @test_throws ArgumentError GaussianNB(var_smoothing=NaN)
+            @test_throws ArgumentError GaussianNB(var_smoothing=Inf)
+            # Value-only `priors` validation is data-independent, so it happens in
+            # the constructor (fail fast), not just at fit. Length validation needs
+            # the class count and stays in fit (see "Bad priors rejected at fit").
+            @test_throws ArgumentError GaussianNB(priors=[0.3, 0.3])      # sums to 0.6, not 1
+            @test_throws ArgumentError GaussianNB(priors=[-0.1, 1.1])     # negative entry
+            @test_throws ArgumentError GaussianNB(priors=[NaN, 0.5])      # non-finite entry
+            @test_throws ArgumentError GaussianNB(priors=[Inf, 0.5])      # non-finite entry
+        end
+
+        @testset "Predict not fitted" begin
+            gnb = GaussianNB()
+            @test_throws ErrorException gnb([1.0, 2.0])
+            @test_throws ErrorException gnb([1.0 2.0; 3.0 4.0])
+        end
+
+        @testset "Fit sets learned attributes" begin
+            X = [1.0 1.0; 1.2 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            y = [0, 0, 0, 1, 1, 1]
+            gnb = GaussianNB()
+            result = gnb(X, y)
+            @test result === gnb
+            @test gnb.fitted == true
+            @test gnb.classes_ == [0, 1]
+            @test gnb.n_features_in_ == 2
+            @test size(gnb.theta_) == (2, 2)
+            @test size(gnb.var_) == (2, 2)
+            @test gnb.class_count_ == [3.0, 3.0]
+            @test gnb.class_prior_ ≈ [0.5, 0.5]
+            # class-0 mean of feature 1 = mean(1.0, 1.2, 0.8) = 1.0
+            @test gnb.theta_[1, 1] ≈ 1.0
+        end
+
+        @testset "Predict — well-separated classes" begin
+            X = [1.0 1.0; 1.2 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            y = [0, 0, 0, 1, 1, 1]
+            gnb = GaussianNB()
+            gnb(X, y)
+
+            # In-sample predictions recover the labels on a separable problem
+            @test gnb(X) == y
+            # Single-sample predict
+            @test gnb([1.0, 1.0]) == 0
+            @test gnb([10.0, 10.0]) == 1
+            # A clearly class-0 query
+            @test gnb([0.9, 1.0]) == 0
+        end
+
+        @testset "Predict probabilities" begin
+            X = [1.0 1.0; 1.2 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            y = [0, 0, 0, 1, 1, 1]
+            gnb = GaussianNB()
+            gnb(X, y)
+
+            probs = gnb(X; type=:probs)
+            @test size(probs) == (6, 2)
+            @test all(probs .>= 0)
+            @test all(isapprox.(sum(probs, dims=2), 1.0; atol=1e-8))
+            # First sample is class 0 → higher posterior in column 1
+            @test probs[1, 1] > probs[1, 2]
+            # Last sample is class 1 → higher posterior in column 2
+            @test probs[6, 2] > probs[6, 1]
+        end
+
+        @testset "Custom priors used" begin
+            X = [1.0 1.0; 1.2 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            y = [0, 0, 0, 1, 1, 1]
+            gnb = GaussianNB(priors=[0.4, 0.6])
+            gnb(X, y)
+            @test gnb.class_prior_ ≈ [0.4, 0.6]
+        end
+
+        @testset "Bad priors length rejected at fit" begin
+            X = [1.0 1.0; 10.0 10.0]
+            y = [0, 1]
+            # Wrong length is the genuine fit-time rejection: [0.5, 0.3, 0.2] is a
+            # valid prior vector by value (sums to 1, all positive, finite) so it
+            # clears the constructor, then fails the length check in fit against the
+            # 2 classes. (Value-only failures — sum≠1, negative, non-finite — are now
+            # caught earlier, in the constructor; see "Constructor validation".)
+            @test_throws ArgumentError GaussianNB(priors=[0.5, 0.3, 0.2])(X, y)
+        end
+
+        @testset "Mismatched X/y rows rejected" begin
+            X = [1.0 1.0; 2.0 2.0; 3.0 3.0]
+            @test_throws DimensionMismatch GaussianNB()(X, [0, 1])
+        end
+
+        @testset "Mismatched feature count at predict rejected" begin
+            X = [1.0 1.0; 1.2 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            y = [0, 0, 0, 1, 1, 1]
+            gnb = GaussianNB()
+            gnb(X, y)
+            # A length-1 vector would otherwise broadcast across the 2-feature
+            # model and silently mispredict; too-many features must also be caught.
+            @test_throws DimensionMismatch gnb([1.0])
+            @test_throws DimensionMismatch gnb([1.0, 2.0, 3.0])
+            # Batch predict with the wrong number of columns
+            @test_throws DimensionMismatch gnb([1.0 2.0 3.0; 4.0 5.0 6.0])
+            @test_throws DimensionMismatch gnb(reshape([1.0, 2.0], 2, 1))
+        end
+
+        @testset "Empty / zero-feature data rejected" begin
+            # No samples (0-row X with matching empty y): would otherwise leave a
+            # NaN epsilon and silently produce a NaN-fitted model.
+            @test_throws ArgumentError GaussianNB()(Matrix{Float64}(undef, 0, 2), Int[])
+            # No features (0-column X): would otherwise throw a cryptic
+            # "reducing over an empty collection" error from `maximum`.
+            @test_throws ArgumentError GaussianNB()(Matrix{Float64}(undef, 3, 0), [0, 1, 1])
+        end
+
+        @testset "Non-finite features rejected" begin
+            # NaN/Inf pass the empty, row/label, feature-count and (for MNB)
+            # non-negativity guards, but silently poison mean/var → posteriors;
+            # argmax over a NaN log-joint returns an arbitrary class. Reject at fit
+            # and at predict, mirroring scikit-learn's check_array.
+            Xnan = [1.0 1.0; NaN 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            Xinf = [1.0 1.0; Inf 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            y = [0, 0, 0, 1, 1, 1]
+            @test_throws ArgumentError GaussianNB()(Xnan, y)
+            @test_throws ArgumentError GaussianNB()(Xinf, y)
+
+            # Fit on clean data, then reject non-finite predict inputs.
+            Xgood = [1.0 1.0; 1.2 0.8; 0.8 1.1; 10.0 10.0; 10.2 9.8; 9.8 10.1]
+            gnb = GaussianNB()
+            gnb(Xgood, y)
+            @test_throws ArgumentError gnb([NaN, 1.0])
+            @test_throws ArgumentError gnb([Inf, 1.0])
+            @test_throws ArgumentError gnb([1.0 NaN; 2.0 3.0])
+            @test_throws ArgumentError gnb([1.0 2.0; Inf 3.0])
+        end
+
+        @testset "Degenerate constant data — no NaN" begin
+            # Globally constant feature with var_smoothing=0 would leave a zero
+            # variance; the floor keeps posteriors finite.
+            X = [5.0 5.0; 5.0 5.0; 5.0 5.0; 5.0 5.0]
+            y = [0, 0, 1, 1]
+            gnb = GaussianNB(var_smoothing=0.0)
+            gnb(X, y)
+            probs = gnb(X; type=:probs)
+            @test all(isfinite, probs)
+            @test all(isapprox.(sum(probs, dims=2), 1.0; atol=1e-8))
+            @test all(isfinite, gnb.var_)
+            # Predictions are well-defined (no NaN propagating into argmax)
+            @test all(p -> p in gnb.classes_, gnb(X))
+        end
+
+        @testset "show method" begin
+            gnb = GaussianNB()
+            buf = IOBuffer()
+            show(buf, gnb)
+            s = String(take!(buf))
+            @test occursin("GaussianNB", s)
+            @test occursin("fitted=false", s)
+        end
+    end
+
+    @testset "MultinomialNB" begin
+        using NovaML.NaiveBayes: MultinomialNB
+        using NovaML.FeatureExtraction: CountVectorizer
+
+        @testset "Constructor defaults" begin
+            mnb = MultinomialNB()
+            @test mnb.alpha == 1.0
+            @test mnb.fit_prior == true
+            @test mnb.class_prior === nothing
+            @test mnb.fitted == false
+            @test isempty(mnb.classes_)
+        end
+
+        @testset "Constructor custom params" begin
+            mnb = MultinomialNB(alpha=0.5, fit_prior=false, class_prior=[0.2, 0.8])
+            @test mnb.alpha == 0.5
+            @test mnb.fit_prior == false
+            @test mnb.class_prior == [0.2, 0.8]
+        end
+
+        @testset "Constructor validation" begin
+            @test_throws ArgumentError MultinomialNB(alpha=-0.1)
+            # NaN/Inf pass a bare `< 0` check (both compare false) but would
+            # propagate into NaN `feature_log_prob_`/posteriors at fit.
+            @test_throws ArgumentError MultinomialNB(alpha=NaN)
+            @test_throws ArgumentError MultinomialNB(alpha=Inf)
+            # Value-only `class_prior` validation is data-independent, so it happens
+            # in the constructor (fail fast), not just at fit. Length validation
+            # needs the class count and stays in fit (see "Bad class_prior ...").
+            # class_prior must be *strictly positive* (fit takes log.(class_prior)).
+            @test_throws ArgumentError MultinomialNB(class_prior=[0.3, 0.3])    # sums to 0.6
+            @test_throws ArgumentError MultinomialNB(class_prior=[0.0, 1.0])    # zero entry (log → -Inf)
+            @test_throws ArgumentError MultinomialNB(class_prior=[-0.1, 1.1])   # negative entry
+            @test_throws ArgumentError MultinomialNB(class_prior=[NaN, 0.5])    # non-finite entry
+            @test_throws ArgumentError MultinomialNB(class_prior=[Inf, 0.5])    # non-finite entry
+        end
+
+        @testset "Predict not fitted" begin
+            mnb = MultinomialNB()
+            @test_throws ErrorException mnb([1.0, 0.0])
+            @test_throws ErrorException mnb([1.0 0.0; 0.0 1.0])
+        end
+
+        @testset "Fit + hand-computed numeric correctness" begin
+            # Two classes, two features, alpha = 1.0, fit_prior = true.
+            # class 1 rows: [2,1] and [1,0]  -> feature_count = [3,1], total raw = 4
+            # class 2 rows: [0,2] and [0,1]  -> feature_count = [0,3], total raw = 3
+            X = [2.0 1.0; 1.0 0.0; 0.0 2.0; 0.0 1.0]
+            y = [1, 1, 2, 2]
+            mnb = MultinomialNB(alpha=1.0)
+            mnb(X, y)
+
+            @test mnb.fitted == true
+            @test mnb.classes_ == [1, 2]
+            @test mnb.feature_count_ == [3.0 1.0; 0.0 3.0]
+            @test mnb.class_count_ == [2.0, 2.0]
+
+            # feature_log_prob with Laplace smoothing (denominator = raw_total + alpha*n_features)
+            #   class 1: log(4/6), log(2/6)   ; class 2: log(1/5), log(4/5)
+            @test mnb.feature_log_prob_[1, 1] ≈ log(4 / 6)
+            @test mnb.feature_log_prob_[1, 2] ≈ log(2 / 6)
+            @test mnb.feature_log_prob_[2, 1] ≈ log(1 / 5)
+            @test mnb.feature_log_prob_[2, 2] ≈ log(4 / 5)
+
+            # fitted prior: both classes have 2 samples -> log(0.5)
+            @test mnb.class_log_prior_ ≈ [log(0.5), log(0.5)]
+
+            # Sample [1,0]:  jll1 = log(.5)+log(4/6) ;  jll2 = log(.5)+log(1/5)  -> class 1
+            @test mnb([1.0, 0.0]) == 1
+            # Sample [0,1]:  jll1 = log(.5)+log(2/6) ;  jll2 = log(.5)+log(4/5)  -> class 2
+            @test mnb([0.0, 1.0]) == 2
+        end
+
+        @testset "Predict probabilities" begin
+            X = [2.0 1.0; 1.0 0.0; 0.0 2.0; 0.0 1.0]
+            y = [1, 1, 2, 2]
+            mnb = MultinomialNB()
+            mnb(X, y)
+
+            probs = mnb(X; type=:probs)
+            @test size(probs) == (4, 2)
+            @test all(probs .>= 0)
+            @test all(isapprox.(sum(probs, dims=2), 1.0; atol=1e-8))
+        end
+
+        @testset "fit_prior=false gives uniform prior" begin
+            X = [2.0 1.0; 1.0 0.0; 1.0 0.0; 0.0 3.0]   # imbalanced classes
+            y = [1, 1, 1, 2]
+            mnb = MultinomialNB(fit_prior=false)
+            mnb(X, y)
+            @test mnb.class_log_prior_ ≈ [log(0.5), log(0.5)]
+        end
+
+        @testset "Bad class_prior length rejected at fit" begin
+            X = [1.0 0.0; 0.0 1.0]
+            y = [1, 2]
+            # Wrong length is the genuine fit-time rejection: [0.5, 0.2, 0.3] is a
+            # valid prior vector by value (sums to 1, all positive, finite) so it
+            # clears the constructor, then fails the length check in fit against the
+            # 2 classes. (Value-only failures are caught earlier, in the
+            # constructor; see "Constructor validation".)
+            @test_throws ArgumentError MultinomialNB(class_prior=[0.5, 0.2, 0.3])(X, y)
+        end
+
+        @testset "Mismatched X/y rows rejected" begin
+            X = [1.0 0.0; 0.0 1.0; 1.0 1.0]
+            @test_throws DimensionMismatch MultinomialNB()(X, [1, 2])
+        end
+
+        @testset "Empty / zero-feature data rejected" begin
+            # No samples (0-row X with matching empty y): would otherwise produce a
+            # degenerate zero-class "fitted" model.
+            @test_throws ArgumentError MultinomialNB()(Matrix{Float64}(undef, 0, 2), Int[])
+            # No features (0-column X): empty per-class log-probabilities.
+            @test_throws ArgumentError MultinomialNB()(Matrix{Float64}(undef, 3, 0), [1, 2, 2])
+        end
+
+        @testset "Negative features rejected" begin
+            X = [1.0 -1.0; 0.0 2.0]
+            y = [1, 2]
+            @test_throws ArgumentError MultinomialNB()(X, y)
+        end
+
+        @testset "Non-finite features rejected" begin
+            # `NaN < 0` is false and `Inf >= 0`, so non-finite counts slip past the
+            # non-negativity check; a NaN poisons feature_count_, and an Inf makes
+            # log(Inf) - log(Inf) == NaN in feature_log_prob_. Reject at fit and at
+            # predict (matching scikit-learn's check_array).
+            y = [1, 1, 2, 2]
+            @test_throws ArgumentError MultinomialNB()([2.0 1.0; NaN 0.0; 0.0 2.0; 0.0 1.0], y)
+            @test_throws ArgumentError MultinomialNB()([2.0 1.0; Inf 0.0; 0.0 2.0; 0.0 1.0], y)
+
+            # Fit on clean data, then reject non-finite predict inputs.
+            X = [2.0 1.0; 1.0 0.0; 0.0 2.0; 0.0 1.0]
+            mnb = MultinomialNB()
+            mnb(X, y)
+            @test_throws ArgumentError mnb([NaN, 0.0])
+            @test_throws ArgumentError mnb([Inf, 0.0])
+            @test_throws ArgumentError mnb([1.0 NaN; 0.0 1.0])
+            @test_throws ArgumentError mnb([1.0 0.0; Inf 1.0])
+        end
+
+        @testset "alpha=0 produces no NaN" begin
+            # A feature unseen in a class would give log P = -Inf, and 0 * -Inf = NaN
+            # at predict time; clipping alpha to 1e-10 keeps everything finite.
+            X = [2.0 0.0; 1.0 0.0; 0.0 2.0; 0.0 1.0]   # feature 2 unseen in class 1,
+            y = [1, 1, 2, 2]                            # feature 1 unseen in class 2
+            mnb = MultinomialNB(alpha=0.0)
+            mnb(X, y)
+            @test all(isfinite, mnb.feature_log_prob_)
+            probs = mnb(X; type=:probs)
+            @test all(isfinite, probs)
+            @test all(isapprox.(sum(probs, dims=2), 1.0; atol=1e-8))
+            # Single-sample predict is also NaN-free and recovers the obvious labels
+            @test mnb([1.0, 0.0]) == 1
+            @test mnb([0.0, 1.0]) == 2
+        end
+
+        @testset "Text classification with CountVectorizer" begin
+            docs = [
+                "football game goal striker",
+                "goal match football striker",
+                "election vote senate government",
+                "senate vote election government"
+            ]
+            y = ["sport", "sport", "politics", "politics"]
+
+            cv = CountVectorizer()
+            X = cv(docs)                      # sparse count matrix
+
+            mnb = MultinomialNB()
+            mnb(X, y)
+
+            @test mnb.fitted == true
+            @test sort(mnb.classes_) == ["politics", "sport"]
+            @test mnb.n_features_in_ == size(X, 2)
+
+            # In-sample predictions recover the labels (well-separated vocabulary)
+            preds = mnb(X)
+            @test preds == y
+
+            # Probabilities are valid
+            probs = mnb(X; type=:probs)
+            @test size(probs) == (4, 2)
+            @test all(isapprox.(sum(probs, dims=2), 1.0; atol=1e-8))
+        end
+
+        @testset "show method" begin
+            mnb = MultinomialNB()
+            buf = IOBuffer()
+            show(buf, mnb)
+            s = String(take!(buf))
+            @test occursin("MultinomialNB", s)
+            @test occursin("fitted=false", s)
+        end
+    end
+
 end

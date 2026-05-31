@@ -26,8 +26,9 @@ include("LinearModel/LinearModel.jl")
 include("MultiClass/MultiClass.jl")
 include("Neighbors/Neighbors.jl")
 include("SVM/SVM.jl")
+include("NaiveBayes/NaiveBayes.jl")
 
-export Tree, Ensemble, LinearModel, MultiClass, Neighbors, SVM
+export Tree, Ensemble, LinearModel, MultiClass, Neighbors, SVM, NaiveBayes
 
 include("Decomposition/Decomposition.jl")
 export Decomposition

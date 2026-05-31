@@ -1,7 +1,7 @@
 name = "NovaML"
 uuid = "3f482e55-661e-4eec-8a53-436578a72954"
 authors = ["ilkerarslan <ilker.arslan@outlook.com>"]
-version = "0.5.0"
+version = "0.6.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

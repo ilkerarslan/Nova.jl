@@ -146,6 +146,20 @@ X, y = load_boston(return_X_y=true)
 
 - `KNeighborsClassifier`: K-nearest neighbors classifier
 
+### NaiveBayes
+
+- `GaussianNB`: Gaussian Naive Bayes classifier for continuous features. Estimates per-class feature means and variances together with class priors, and classifies using Gaussian likelihoods computed in log space for numerical stability.
+- `MultinomialNB`: Multinomial Naive Bayes classifier for count/frequency features (e.g. text data produced by `CountVectorizer` / `TfidfVectorizer`). Uses Laplace/Lidstone (`alpha`) smoothing and supports fitted, user-supplied, or uniform class priors.
+
+```julia
+using NovaML.NaiveBayes: GaussianNB
+
+gnb = GaussianNB()
+gnb(Xtrn, ytrn)            # fit
+ŷ = gnb(Xtst)             # predict labels
+probs = gnb(Xtst; type=:probs)   # class posteriors
+```
+
 ### Decomposition
 
 - `LatentDirichletAllocation`: A generative statistical model that allows sets of observations to be explained by unobserved groups. It's commonly used for topic modeling in natural language processing.
