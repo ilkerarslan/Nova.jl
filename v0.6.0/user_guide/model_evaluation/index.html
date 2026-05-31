@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Model Evaluation · NovaML.jl</title><meta name="title" content="Model Evaluation · NovaML.jl"/><meta property="og:title" content="Model Evaluation · NovaML.jl"/><meta property="twitter:title" content="Model Evaluation · NovaML.jl"/><meta name="description" content="Documentation for NovaML.jl."/><meta property="og:description" content="Documentation for NovaML.jl."/><meta property="twitter:description" content="Documentation for NovaML.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">NovaML.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../getting_started/">Getting Started</a></li><li><a class="tocitem" href="../core_concepts/">Core Concepts</a></li><li><a class="tocitem" href="../preprocessing/">Data Preprocessing</a></li><li><a class="tocitem" href="../model_training/">Model Training</a></li><li class="is-active"><a class="tocitem" href>Model Evaluation</a><ul class="internal"><li><a class="tocitem" href="#Classification-Metrics"><span>Classification Metrics</span></a></li><li><a class="tocitem" href="#Regression-Metrics"><span>Regression Metrics</span></a></li><li><a class="tocitem" href="#Clustering-Metrics"><span>Clustering Metrics</span></a></li></ul></li><li><a class="tocitem" href="../feature_engineering/">Feature Engineering</a></li><li><a class="tocitem" href="../pipelines/">Pipelines</a></li><li><a class="tocitem" href="../hyperparameter_tuning/">Hyperparameter Tuning</a></li><li><a class="tocitem" href="../cross_validation/">Cross-Validation</a></li></ul></li><li><span class="tocitem">Models</span><ul><li><a class="tocitem" href="../../models/linear_models/">Linear Models</a></li><li><a class="tocitem" href="../../models/tree_models/">Tree-Based Models</a></li><li><a class="tocitem" href="../../models/ensemble_methods/">Ensemble Methods</a></li><li><a class="tocitem" href="../../models/svm/">Support Vector Machines</a></li><li><a class="tocitem" href="../../models/clustering/">Clustering</a></li><li><a class="tocitem" href="../../models/dimensionality_reduction/">Dimensionality Reduction</a></li></ul></li><li><a class="tocitem" href="../../api/">API Reference</a></li><li><a class="tocitem" href="../../contribute/">Contributing</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User Guide</a></li><li class="is-active"><a href>Model Evaluation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Model Evaluation</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ilkerarslan/NovaML.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ilkerarslan/NovaML.jl/blob/master/docs/src/user_guide/model_evaluation.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Model-Evaluation"><a class="docs-heading-anchor" href="#Model-Evaluation">Model Evaluation</a><a id="Model-Evaluation-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Evaluation" title="Permalink"></a></h1><p>NovaML provides a range of tools and metrics for evaluating the performance of machine learning models. This page covers the main evaluation techniques and metrics available in NovaML.</p><h2 id="Classification-Metrics"><a class="docs-heading-anchor" href="#Classification-Metrics">Classification Metrics</a><a id="Classification-Metrics-1"></a><a class="docs-heading-anchor-permalink" href="#Classification-Metrics" title="Permalink"></a></h2><h3 id="Accuracy-Score"><a class="docs-heading-anchor" href="#Accuracy-Score">Accuracy Score</a><a id="Accuracy-Score-1"></a><a class="docs-heading-anchor-permalink" href="#Accuracy-Score" title="Permalink"></a></h3><p>Accuracy is the ratio of correct predictions to total predictions.</p><pre><code class="language-julia hljs">using NovaML.Metrics
+
+y = [0, 1, 1, 0, 1];
+ŷ = [0, 1, 0, 0, 1]
+
+accuracy = accuracy_score(y, ŷ);
+println(&quot;Accuracy: $accuracy&quot;)</code></pre><p>Following example load the Wisconsin Breast Cancer dataset, splits it to training and test sets and traing a logistic regression model with the training set. Then it calculates the accuracy_score for training and test sets. </p><pre><code class="language-julia hljs">using NovaML.Datasets: load_breast_cancer
+X, y = load_breast_cancer(return_X_y=true)
+
+using NovaML.ModelSelection
+Xtrn, Xtst, ytrn, ytst = train_test_split(X, y, test_size=0.2,
+                                          stratify=y, random_state=1)
+
+using NovaML.LinearModel
+lr = LogisticRegression()
+
+# train the model
+lr(Xtrn, ytrn)
+
+using NovaML.Metrics
+ŷtrn, ŷtst = lr(Xtrn), lr(Xtst)
+
+# training data accuracy
+accuracy_score(ŷtrn, ytrn)
+# test data accuracy
+accuracy_score(ŷtst, ytst) </code></pre><h3 id="Confusion-Matrix"><a class="docs-heading-anchor" href="#Confusion-Matrix">Confusion Matrix</a><a id="Confusion-Matrix-1"></a><a class="docs-heading-anchor-permalink" href="#Confusion-Matrix" title="Permalink"></a></h3><p>The confusion matrix provides a detailed breakdown of correct and incorrect classifications for each class. You can use <code>confusion_matrix</code> to create the confusion matrix and <code>display_confusion_matrix</code> to display it with labels. </p><pre><code class="language-julia hljs">using NovaML.Metrics
+confmat = confusion_matrix(ytst, ŷtst)
+# 2×2 Matrix{Int64}:
+#  71   1
+#   5  37</code></pre><pre><code class="language-julia hljs">display_confusion_matrix(confmat)
+#        1    2
+#    ----------
+# 1 | 71.0  1.0
+# 2 |  5.0 37.0</code></pre><p>We can create a better looking confusion matrix plot using the following function:</p><pre><code class="language-julia hljs">using Plots
+using Plots.PlotMeasures
+
+function plot_confusion_matrix(confmat::Matrix)
+    n = size(confmat, 1)
+    
+    heatmap(confmat, 
+            c=:Blues, 
+            alpha=0.3, 
+            aspect_ratio=:equal, 
+            size=(300, 300),
+            xrotation=0,
+            xticks=1:n, 
+            yticks=1:n,
+            xlims=(0.5, n+0.5), 
+            ylims=(0.5, n+0.5),
+            right_margin=5mm,
+            xlabel=&quot;Predicted label&quot;,
+            ylabel=&quot;True label&quot;,
+            xmirror=true, 
+            framestyle=:box, 
+            legend=nothing)
+    
+    for i in 1:n, j in 1:n
+        annotate!(j, i, text(string(confmat[i,j]), :center, 10))
+    end
+    
+    plot!(yflip=true)
+    
+    display(current())
+end</code></pre><pre><code class="language-julia hljs">plot_confusion_matrix(confmat)</code></pre><p><img src="../images/plot_1.svg" alt="Confusion matrix plot"/></p><h3 id="Precision,-Recall,-and-F1-Score"><a class="docs-heading-anchor" href="#Precision,-Recall,-and-F1-Score">Precision, Recall, and F1 Score</a><a id="Precision,-Recall,-and-F1-Score-1"></a><a class="docs-heading-anchor-permalink" href="#Precision,-Recall,-and-F1-Score" title="Permalink"></a></h3><p>These metrics provide more detailed insights into model performance, especially for imbalanced datasets.</p><pre><code class="language-julia hljs">using NovaML.Metrics
+
+precision_score(ytst, ŷtst)
+# 0.9736842105263158
+recall_score(ytst, ŷtst)
+# 0.8809523809523809
+f1_score(ytst, ŷtst)
+# 0.925</code></pre><h3 id="Matthews-Correlation-Coefficient"><a class="docs-heading-anchor" href="#Matthews-Correlation-Coefficient">Matthews Correlation Coefficient</a><a id="Matthews-Correlation-Coefficient-1"></a><a class="docs-heading-anchor-permalink" href="#Matthews-Correlation-Coefficient" title="Permalink"></a></h3><p>The Matthews Correlation Coefficient (MCC) is a balanced measure for binary classification problems. It takes into account true and false positives and negatives, providing a balanced measure even for classes of different sizes.</p><p class="math-container">\[MCC = \frac{TN \times TP - FN \times FP}{\sqrt{(TP+FP)(TP+FN)(TN+FP)(TN+FN)}}\]</p><p>where</p><ul><li>TP: True Positive</li><li>FP: False Positive</li><li>TN: True Negative</li><li>FN: False Negative</li></ul><p>MCC ranges from -1 to +1:</p><ul><li>+1 represents a perfect prediction</li><li>0 represents no better than random prediction</li><li>1 indicates total disagreement between prediction and observation</li></ul><pre><code class="language-julia hljs">using NovaML.Metrics
+matthews_corrcoef(ytst, ŷ)
+#0.8872442622820285</code></pre><h3 id="ROC-Curve-and-AUC"><a class="docs-heading-anchor" href="#ROC-Curve-and-AUC">ROC Curve and AUC</a><a id="ROC-Curve-and-AUC-1"></a><a class="docs-heading-anchor-permalink" href="#ROC-Curve-and-AUC" title="Permalink"></a></h3><p>For binary classification problems, you can compute the Receiver Operating Characteristic (ROC) curve and the Area Under the Curve (AUC).</p><pre><code class="language-julia hljs">ŷprobs = lr(Xtst, type=:probs)[:, 2]
+fpr, tpr, _ = roc_curve(ytst, ŷprobs);
+# auc score
+roc_auc = auc(fpr, tpr)
+# 0.9923941798941799</code></pre><p>We can also plot the receiver operating characteristic curve using <code>fpr</code> and <code>tpr</code> values.</p><pre><code class="language-julia hljs">plot(fpr, tpr, color=:blue, linestyle=:solid, 
+     label=&quot;Logistic Regression (auc = $(round(roc_auc, digits=2)))&quot;,
+     xlabel=&quot;False Positive&quot;,
+     ylabel=&quot;True Positive&quot;,
+     title=&quot;Receiver Operating Characteristic Curve&quot;)     
+plot!([0, 1], [0, 1], color=:gray, linestyle=:dash, linewidth=2, label=&quot;Random&quot;)</code></pre><p><img src="../images/roc_curve.svg" alt="ROC Curve"/></p><h2 id="Regression-Metrics"><a class="docs-heading-anchor" href="#Regression-Metrics">Regression Metrics</a><a id="Regression-Metrics-1"></a><a class="docs-heading-anchor-permalink" href="#Regression-Metrics" title="Permalink"></a></h2><p>We will use the Boston Housing Data in the section. </p><p>First let&#39;s import and prepare the data. </p><pre><code class="language-julia hljs">using NovaML.Datasets
+X, y = load_boston(return_X_y=true)</code></pre><p>Prepare the training and test data sets.</p><pre><code class="language-julia hljs">using NovaML.ModelSelection
+Xtrn, Xtst, ytrn, ytst = train_test_split(X, y, test_size=0.3, random_state=123)</code></pre><p>Create and fit the linear regression model.</p><pre><code class="language-julia hljs">lr = LinearRegression()
+lr(Xtrn, ytrn)
+ŷtrn = lr(Xtrn)
+ŷtst = lr(Xtst)</code></pre><h3 id="Mean-Absolute-Error-(MAE)"><a class="docs-heading-anchor" href="#Mean-Absolute-Error-(MAE)">Mean Absolute Error (MAE)</a><a id="Mean-Absolute-Error-(MAE)-1"></a><a class="docs-heading-anchor-permalink" href="#Mean-Absolute-Error-(MAE)" title="Permalink"></a></h3><p>MAE measures the average magnitude of errors in a set of predictions, without considering their direction.</p><pre><code class="language-julia hljs">using NovaML.Metrics
+maetrn = mae(ytrn, ŷtrn)
+maetst = mae(ytst, ŷtst)
+maetrn, martst
+#(0.07, 0.09)</code></pre><h3 id="Mean-Squared-Error-(MSE)"><a class="docs-heading-anchor" href="#Mean-Squared-Error-(MSE)">Mean Squared Error (MSE)</a><a id="Mean-Squared-Error-(MSE)-1"></a><a class="docs-heading-anchor-permalink" href="#Mean-Squared-Error-(MSE)" title="Permalink"></a></h3><p>MSE measures the average squared difference between the estimated values and the actual value.</p><pre><code class="language-julia hljs">msetrn = mse(ytrn, ŷtrn)
+msetst = mse(ytst, ŷtst)
+msetrn, msetst
+#(0.0093, 0.0128)</code></pre><h3 id="R-squared-Score"><a class="docs-heading-anchor" href="#R-squared-Score">R-squared Score</a><a id="R-squared-Score-1"></a><a class="docs-heading-anchor-permalink" href="#R-squared-Score" title="Permalink"></a></h3><p>R-squared (R²) provides a measure of how well observed outcomes are replicated by the model, based on the proportion of total variation of outcomes explained by the model.</p><pre><code class="language-julia hljs">r2_score(ytrn, ŷtrn)
+# 0.9992871136620213
+r2_score(ytst, ŷtst)
+# 0.9991476060812577</code></pre><h2 id="Clustering-Metrics"><a class="docs-heading-anchor" href="#Clustering-Metrics">Clustering Metrics</a><a id="Clustering-Metrics-1"></a><a class="docs-heading-anchor-permalink" href="#Clustering-Metrics" title="Permalink"></a></h2><h3 id="Silhouette-Score"><a class="docs-heading-anchor" href="#Silhouette-Score">Silhouette Score</a><a id="Silhouette-Score-1"></a><a class="docs-heading-anchor-permalink" href="#Silhouette-Score" title="Permalink"></a></h3><p>The Silhouette Score is used to evaluate the quality of clusters in clustering algorithms.</p><p>Let&#39;s first create an artificial dataset.</p><pre><code class="language-julia hljs">using NovaML.Datasets
+X, y = make_blobs(
+    n_samples=150,
+    n_features=2,
+    centers=3,
+    cluster_std=0.5,
+    shuffle=true,
+    random_state=123)
+
+using Plots
+begin
+    scatter(X[:, 1], X[:, 2],
+            color=:white,
+            markerstrokecolor=:black,
+            markersize=6,
+            xlabel=&quot;Feature 1&quot;,
+            ylabel=&quot;Feature 2&quot;,
+            grid=true,
+            legend=false)
+    
+    plot!(size=(600, 400), margin=5Plots.mm)
+end</code></pre><p><img src="../images/cluster.svg" alt="Cluster Data"/></p><p>Next, create the clustering algorithm.</p><pre><code class="language-julia hljs">using NovaML.Cluster
+km = KMeans(
+    n_clusters=3,
+    init=&quot;k-means++&quot;,
+    n_init=10,
+    max_iter=300,
+    tol=1e-04,
+    random_state=0)
+
+km(X)</code></pre><p>Now we can create the Silhouette Plot using the <code>silhouette_samples</code> from <code>NovaML.Metrics</code>.</p><pre><code class="language-julia hljs">using Statistics
+using ColorSchemes
+using NovaML.Metrics
+
+function plot_silhoutte(km::KMeans)
+    ykm = km.labels_
+    cluster_labels = sort(unique(km.labels_))
+    n_clusters = length(cluster_labels)
+    silhouette_vals = silhouette_samples(X, km.labels_, metric=&quot;euclidean&quot;)
+    δ = 1. / (length(silhouette_vals)+20)
+    yval = 10δ
+    
+    p = plot(xlabel=&quot;Silhouette coefficient&quot;, label=&quot;Cluster&quot;, title=&quot;Silhouette Plot&quot;, legend=false, ylims=(0.0, 1.0), xlims=(0.0, 1.0), ylabel=&quot;Cluster&quot;);
+    for (i, c) in enumerate(cluster_labels)
+        c_silhouette_vals = silhouette_vals[ykm.==c]
+        sort!(c_silhouette_vals)
+        color = get(ColorSchemes.jet, i/n_clusters)
+        for xval in c_silhouette_vals
+            plot!(p, [0, xval], [yval, yval], color=color)
+            yval += δ
+        end
+    end
+    silhouette_avg = mean(silhouette_vals)
+    vline!([silhouette_avg], color=:red, linestyle=:dash, lw=2)
+    
+    start = (1-20δ)/6
+    stop = (1 - 10δ) - (1-20δ)/6
+    
+    yticks!(p, range(start, stop, length=n_clusters), string.(cluster_labels))    
+end</code></pre><p><img src="../images/silhouette_plot.svg" alt="silhouette plot"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../model_training/">« Model Training</a><a class="docs-footer-nextpage" href="../feature_engineering/">Feature Engineering »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Sunday 31 May 2026 19:17">Sunday 31 May 2026</span>. Using Julia version 1.10.11.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

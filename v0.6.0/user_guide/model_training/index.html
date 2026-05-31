@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Model Training · NovaML.jl</title><meta name="title" content="Model Training · NovaML.jl"/><meta property="og:title" content="Model Training · NovaML.jl"/><meta property="twitter:title" content="Model Training · NovaML.jl"/><meta name="description" content="Documentation for NovaML.jl."/><meta property="og:description" content="Documentation for NovaML.jl."/><meta property="twitter:description" content="Documentation for NovaML.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">NovaML.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../getting_started/">Getting Started</a></li><li><a class="tocitem" href="../core_concepts/">Core Concepts</a></li><li><a class="tocitem" href="../preprocessing/">Data Preprocessing</a></li><li class="is-active"><a class="tocitem" href>Model Training</a><ul class="internal"><li><a class="tocitem" href="#General-Training-Procedure"><span>General Training Procedure</span></a></li><li><a class="tocitem" href="#Classification-Models"><span>Classification Models</span></a></li><li><a class="tocitem" href="#Regression-Models"><span>Regression Models</span></a></li><li><a class="tocitem" href="#Clustering-Models"><span>Clustering Models</span></a></li><li><a class="tocitem" href="#Support-Vector-Machines"><span>Support Vector Machines</span></a></li><li><a class="tocitem" href="#Multi-class-Classification"><span>Multi-class Classification</span></a></li><li><a class="tocitem" href="#Model-Parameters"><span>Model Parameters</span></a></li><li><a class="tocitem" href="#Handling-Convergence-and-Iterations"><span>Handling Convergence and Iterations</span></a></li></ul></li><li><a class="tocitem" href="../model_evaluation/">Model Evaluation</a></li><li><a class="tocitem" href="../feature_engineering/">Feature Engineering</a></li><li><a class="tocitem" href="../pipelines/">Pipelines</a></li><li><a class="tocitem" href="../hyperparameter_tuning/">Hyperparameter Tuning</a></li><li><a class="tocitem" href="../cross_validation/">Cross-Validation</a></li></ul></li><li><span class="tocitem">Models</span><ul><li><a class="tocitem" href="../../models/linear_models/">Linear Models</a></li><li><a class="tocitem" href="../../models/tree_models/">Tree-Based Models</a></li><li><a class="tocitem" href="../../models/ensemble_methods/">Ensemble Methods</a></li><li><a class="tocitem" href="../../models/svm/">Support Vector Machines</a></li><li><a class="tocitem" href="../../models/clustering/">Clustering</a></li><li><a class="tocitem" href="../../models/dimensionality_reduction/">Dimensionality Reduction</a></li></ul></li><li><a class="tocitem" href="../../api/">API Reference</a></li><li><a class="tocitem" href="../../contribute/">Contributing</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User Guide</a></li><li class="is-active"><a href>Model Training</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Model Training</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ilkerarslan/NovaML.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ilkerarslan/NovaML.jl/blob/master/docs/src/user_guide/model_training.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Model-Training"><a class="docs-heading-anchor" href="#Model-Training">Model Training</a><a id="Model-Training-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Training" title="Permalink"></a></h1><p>NovaML.jl provides a unified and intuitive interface for training machine learning models. This page covers the basics of model training, including how to initialize, fit, and use different types of models.</p><h2 id="General-Training-Procedure"><a class="docs-heading-anchor" href="#General-Training-Procedure">General Training Procedure</a><a id="General-Training-Procedure-1"></a><a class="docs-heading-anchor-permalink" href="#General-Training-Procedure" title="Permalink"></a></h2><p>Most supervised learning models in NovaML follow this general pattern:</p><ol><li>Initialize the model with desired hyperparameters</li><li>Call the model with training data to fit it</li><li>Use the fitted model to make predictions on new data</li></ol><h2 id="Classification-Models"><a class="docs-heading-anchor" href="#Classification-Models">Classification Models</a><a id="Classification-Models-1"></a><a class="docs-heading-anchor-permalink" href="#Classification-Models" title="Permalink"></a></h2><h3 id="Logistic-Regression"><a class="docs-heading-anchor" href="#Logistic-Regression">Logistic Regression</a><a id="Logistic-Regression-1"></a><a class="docs-heading-anchor-permalink" href="#Logistic-Regression" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.LinearModel
+
+# Initialize the model
+lr = LogisticRegression(
+    η=0.1,          # η: \eta
+    num_iter=100,
+    solver=:lbfgs,
+    λ=0.1)          # λ: \lambda 
+
+# Fit the model
+lr(Xtrain, ytrain)
+
+# Make predictions
+ŷtrn = lr(Xtrain) # ŷ: y\hat
+ŷtst = lr(Xtst)
+
+# Get probability predictions
+ŷprobs = lr(Xtest, type=:probs)</code></pre><h3 id="Decision-Tree-Classifier"><a class="docs-heading-anchor" href="#Decision-Tree-Classifier">Decision Tree Classifier</a><a id="Decision-Tree-Classifier-1"></a><a class="docs-heading-anchor-permalink" href="#Decision-Tree-Classifier" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.Tree
+
+# Initialize the model
+dt = DecisionTreeClassifier(max_depth=5)
+
+# Fit the model
+dt(Xtrain, ytrain)
+
+# Make predictions
+ŷ = dt(Xtest)</code></pre><h3 id="RandomForestClassifier"><a class="docs-heading-anchor" href="#RandomForestClassifier">RandomForestClassifier</a><a id="RandomForestClassifier-1"></a><a class="docs-heading-anchor-permalink" href="#RandomForestClassifier" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.Ensemble
+
+# Initialize the model
+rf = RandomForestClassifier(n_estimators=500, max_depth=5)
+
+# Fit the model
+rf(Xtrain, ytrain)
+
+# Make predictions
+ŷ = rf(Xtest)</code></pre><h2 id="Regression-Models"><a class="docs-heading-anchor" href="#Regression-Models">Regression Models</a><a id="Regression-Models-1"></a><a class="docs-heading-anchor-permalink" href="#Regression-Models" title="Permalink"></a></h2><h3 id="Linear-Regression"><a class="docs-heading-anchor" href="#Linear-Regression">Linear Regression</a><a id="Linear-Regression-1"></a><a class="docs-heading-anchor-permalink" href="#Linear-Regression" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.LinearModel
+
+# Initialize the model
+lr = LinearRegression()
+
+# Fit the model
+lr(Xtrain, ytrain)
+
+# Make predictions
+ŷ = lr(Xtest)</code></pre><h3 id="Decision-Tree-Regressor"><a class="docs-heading-anchor" href="#Decision-Tree-Regressor">Decision Tree Regressor</a><a id="Decision-Tree-Regressor-1"></a><a class="docs-heading-anchor-permalink" href="#Decision-Tree-Regressor" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.Tree
+
+# Initialize the model
+dt = DecisionTreeRegressor(max_depth=5)
+
+# Fit the model
+dt(Xtrain, ytrain)
+
+# Make predictions
+ŷ = dt(Xtest)</code></pre><h2 id="Clustering-Models"><a class="docs-heading-anchor" href="#Clustering-Models">Clustering Models</a><a id="Clustering-Models-1"></a><a class="docs-heading-anchor-permalink" href="#Clustering-Models" title="Permalink"></a></h2><h3 id="K-Means"><a class="docs-heading-anchor" href="#K-Means">K-Means</a><a id="K-Means-1"></a><a class="docs-heading-anchor-permalink" href="#K-Means" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.Cluster
+
+# Initialize the model
+kmeans = KMeans(n_clusters=3)
+
+# Fit the model
+kmeans(X)
+
+# Get cluster assignments
+labels = kmeans(X)</code></pre><h2 id="Support-Vector-Machines"><a class="docs-heading-anchor" href="#Support-Vector-Machines">Support Vector Machines</a><a id="Support-Vector-Machines-1"></a><a class="docs-heading-anchor-permalink" href="#Support-Vector-Machines" title="Permalink"></a></h2><h3 id="Support-Vector-Classifier"><a class="docs-heading-anchor" href="#Support-Vector-Classifier">Support Vector Classifier</a><a id="Support-Vector-Classifier-1"></a><a class="docs-heading-anchor-permalink" href="#Support-Vector-Classifier" title="Permalink"></a></h3><pre><code class="language-julia hljs">using NovaML.SVM
+
+# Initialize the model
+svm = SVC(kernel=:rbf, C=1.0)
+
+# Fit the model
+svm(Xtrain, ytrain)
+
+# Make predictions
+y_pred = svm(Xtest)</code></pre><h2 id="Multi-class-Classification"><a class="docs-heading-anchor" href="#Multi-class-Classification">Multi-class Classification</a><a id="Multi-class-Classification-1"></a><a class="docs-heading-anchor-permalink" href="#Multi-class-Classification" title="Permalink"></a></h2><pre><code class="language-julia hljs">using NovaML.MultiClass
+using NovaML.LinearModel
+
+# Initialize the base model
+lr = LogisticRegression(η=0.1, num_iter=100)
+
+# Wrap it in a OneVsRestClassifier
+ovr = OneVsRestClassifier(lr)
+
+# Fit the model
+ovr(Xtrain, ytrain)
+
+# Make predictions
+y_pred = ovr(Xtest)</code></pre><h2 id="Model-Parameters"><a class="docs-heading-anchor" href="#Model-Parameters">Model Parameters</a><a id="Model-Parameters-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Parameters" title="Permalink"></a></h2><p>After training, you can access model parameters:</p><pre><code class="language-julia hljs"># For LinearRegression
+coefficients = lr.w
+intercept = lr.b
+
+# For DecisionTreeClassifier
+feature_importances = dt.feature_importances_</code></pre><h2 id="Handling-Convergence-and-Iterations"><a class="docs-heading-anchor" href="#Handling-Convergence-and-Iterations">Handling Convergence and Iterations</a><a id="Handling-Convergence-and-Iterations-1"></a><a class="docs-heading-anchor-permalink" href="#Handling-Convergence-and-Iterations" title="Permalink"></a></h2><p>Some models, like LogisticRegression, allow to specify the number of iterations and learning rate:</p><pre><code class="language-julia hljs">lr = LogisticRegression(η=0.01, num_iter=1000)</code></pre><p>You can inspect the training process by looking at the loss history:</p><pre><code class="language-julia hljs">losses = lr.losses</code></pre><p>For the full list of models you can check <strong>Core Concepts</strong> page or <strong>API Reference</strong>.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../preprocessing/">« Data Preprocessing</a><a class="docs-footer-nextpage" href="../model_evaluation/">Model Evaluation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Sunday 31 May 2026 19:17">Sunday 31 May 2026</span>. Using Julia version 1.10.11.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
